@@ -27,7 +27,6 @@ const createCourse = async (
       return next(createHttpError(400, 'Cover image is required'));
     }
 
-    // Upload image to Cloudinary
     const image = await uploadonCloudinary(coverImageFile.path, {
       folder: 'courses',
     });
@@ -71,4 +70,32 @@ const createCourse = async (
   }
 };
 
-export { createCourse };
+const getCourseById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { courseId } = req.params;
+
+  if (!courseId || Array.isArray(courseId)) {
+    return next(createHttpError(400, "Course id is required"));
+  }
+
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return next(createHttpError(404, "Course not found"));
+    }
+
+    return res.status(200).json(course);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, "Error while fetching course"));
+  }
+};
+
+
+export { createCourse, getCourseById };
