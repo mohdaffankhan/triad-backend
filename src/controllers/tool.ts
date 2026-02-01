@@ -40,4 +40,39 @@ const getAllTools = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { createTool, getAllTools };
+const updateTool = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Tool id is required'));
+  }
+
+  try {
+    const tool = await prisma.tool.findUnique({
+      where: { id },
+    });
+
+    if (!tool) {
+      return next(createHttpError(404, 'Tool not found'));
+    }
+
+    const data: any = {};
+    const body = req.body || {};
+
+    if (body.name) data.name = body.name;
+    if (body.description) data.description = body.description;
+    if (body.url) data.url = body.url;
+
+    const updatedTool = await prisma.tool.update({
+      where: { id },
+      data,
+    });
+
+    return res.status(200).json(updatedTool);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while updating tool'));
+  }
+};
+
+export { createTool, getAllTools, updateTool };
