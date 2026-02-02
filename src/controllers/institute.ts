@@ -123,4 +123,51 @@ const updateInstitution = async (
   }
 };
 
-export { createInstitution, getAllInstitutions, updateInstitution };
+const deleteInstitution = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Institution id is required'));
+  }
+
+  try {
+    const institution = await prisma.institution.findUnique({
+      where: { id },
+    });
+
+    if (!institution) {
+      return next(createHttpError(404, 'Institution not found'));
+    }
+
+    // 1. Delete logo from Cloudinary
+    if (institution.logo) {
+      const publicId = getPublicId(institution.logo);
+      if (publicId) {
+        await deleteOnCloudinary(publicId);
+      }
+    }
+
+    // 2. Delete DB row
+    await prisma.institution.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({
+      message: 'Institution deleted successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while deleting institution'));
+  }
+};
+
+export {
+  createInstitution,
+  getAllInstitutions,
+  updateInstitution,
+  deleteInstitution,
+};
