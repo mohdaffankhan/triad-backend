@@ -28,4 +28,8 @@ app.use('/api/v1/tools', toolRouter);
 import instituteRouter from './routers/institute.js';
 app.use('/api/v1/institutes', instituteRouter);
 
+// privacy policy router
+import privacyPolicyRouter from './routers/privacyPolicy.js';
+app.use('/api/v1/privacy-policy', privacyPolicyRouter);
+
 export default app;
