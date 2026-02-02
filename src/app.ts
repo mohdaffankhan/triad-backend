@@ -4,24 +4,28 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Triad" });
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Triad' });
 });
 
 // mentor router
 import mentorRouter from './routers/mentor.js';
-app.use("/api/v1/mentors", mentorRouter);
+app.use('/api/v1/mentors', mentorRouter);
 
 //course router
 import courseRouter from './routers/course.js';
-app.use("/api/v1/courses", courseRouter);
+app.use('/api/v1/courses', courseRouter);
 
 //course-mentor router
 import courseMentorRouter from './routers/course-mentor.js';
-app.use("/api/v1/course-mentor", courseMentorRouter);
+app.use('/api/v1/course-mentor', courseMentorRouter);
 
 // tool router
 import toolRouter from './routers/tool.js';
-app.use("/api/v1/tools", toolRouter);
+app.use('/api/v1/tools', toolRouter);
+
+// institute router
+import instituteRouter from './routers/institute.js';
+app.use('/api/v1/institutes', instituteRouter);
 
 export default app;
