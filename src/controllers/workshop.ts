@@ -67,4 +67,68 @@ const getAllWorkshops = async (
   }
 };
 
-export { createWorkshop, getAllWorkshops };
+const updateWorkshop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Workshop id is required'));
+  }
+
+  try {
+    const workshop = await prisma.workshop.findUnique({
+      where: { id },
+    });
+
+    if (!workshop) {
+      return next(createHttpError(404, 'Workshop not found'));
+    }
+
+    const data: any = {};
+    const body = req.body || {};
+
+    if (body.name) data.name = body.name;
+    if (body.description) data.description = body.description;
+    if (body.category) data.category = body.category;
+    if (body.venue) data.venue = body.venue;
+    if (body.date) data.date = body.date;
+
+    // SAFE image replacement
+    if (req.file) {
+      // 1. Upload new image
+      const newImage = await uploadonCloudinary(req.file.path, {
+        folder: 'workshops',
+      });
+
+      if (!newImage) {
+        return next(createHttpError(500, 'Image upload failed'));
+      }
+
+      data.coverImage = newImage.secure_url;
+    }
+
+    // 2. Update DB
+    const updatedWorkshop = await prisma.workshop.update({
+      where: { id },
+      data,
+    });
+
+    // 3. Delete old image AFTER DB update
+    if (req.file && workshop.coverImage) {
+      const oldPublicId = getPublicId(workshop.coverImage);
+      if (oldPublicId) {
+        await deleteOnCloudinary(oldPublicId);
+      }
+    }
+
+    return res.status(200).json(updatedWorkshop);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while updating workshop'));
+  }
+};
+
+export { createWorkshop, getAllWorkshops, updateWorkshop };
