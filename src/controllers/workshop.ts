@@ -50,4 +50,21 @@ const createWorkshop = async (
   }
 };
 
-export { createWorkshop };
+const getAllWorkshops = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const workshops = await prisma.workshop.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return res.status(200).json(workshops);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while getting workshops'));
+  }
+};
+
+export { createWorkshop, getAllWorkshops };
