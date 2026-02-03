@@ -36,4 +36,8 @@ app.use('/api/v1/institutes', instituteRouter);
 import privacyPolicyRouter from './routers/privacyPolicy.js';
 app.use('/api/v1/privacy-policy', privacyPolicyRouter);
 
+// terms of service router
+import termsOfServiceRouter from './routers/termsOfService.js';
+app.use('/api/v1/terms-of-service', termsOfServiceRouter);
+
 export default app;
