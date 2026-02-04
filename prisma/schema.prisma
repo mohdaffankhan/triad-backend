@@ -64,6 +64,8 @@ model Tool {
   name        String
   description String
   url         String
+  icon        String?
+  coverImage  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,7 +96,7 @@ model Institution {
 model PrivacyPolicy {
   id            String   @id @default(cuid())
   content       String
-  effectiveDate DateTime
+  effectiveDate String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -103,7 +105,7 @@ model PrivacyPolicy {
 model TermsOfService {
   id            String   @id @default(cuid())
   content       String
-  effectiveDate DateTime
+  effectiveDate String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -113,7 +115,21 @@ model Journey {
   id          String   @id @default(cuid())
   title       String
   description String
-  coverImage  String
+  coverImage  String?
+  date        String
+  icon        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Career {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  location    String
+  type        String
+  featured    Boolean  @default(false)
+  applyLink   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
