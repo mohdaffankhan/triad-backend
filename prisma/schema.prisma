@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum TestimonialType {
+  GENERAL
+  COURSE
+}
+
 model Mentor {
   id          String @id @default(cuid())
   name        String
@@ -41,9 +46,11 @@ model Course {
   originalPrice   Int
   discountedPrice Int
   features        String[]
+  isRunning       Boolean  @default(false)
 
-  mentors CourseMentor[]
-  testimonials testimonials[]
+  mentors      CourseMentor[]
+  tools        CourseTool[]
+  testimonials Testimonial[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -62,15 +69,28 @@ model CourseMentor {
 }
 
 model Tool {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String
   url         String
   icon        String?
   coverImage  String?
 
+  courses CourseTool[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CourseTool {
+  id       String @id @default(cuid())
+  courseId String
+  toolId   String
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, toolId])
 }
 
 model Workshop {
@@ -87,10 +107,10 @@ model Workshop {
 }
 
 model Institution {
-  id   String @id @default(cuid())
-  name String
-  logo String
-  city String
+  id    String @id @default(cuid())
+  name  String
+  logo  String
+  city  String
   state String
 
   createdAt DateTime @default(now())
@@ -98,7 +118,7 @@ model Institution {
 }
 
 model PrivacyPolicy {
-  id            String   @id @default(cuid())
+  id            String @id @default(cuid())
   content       String
   effectiveDate String
 
@@ -107,7 +127,7 @@ model PrivacyPolicy {
 }
 
 model TermsOfService {
-  id            String   @id @default(cuid())
+  id            String @id @default(cuid())
   content       String
   effectiveDate String
 

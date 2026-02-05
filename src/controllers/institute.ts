@@ -16,8 +16,8 @@ const createInstitution = async (
     const { name, city, state } = req.body;
     const logoFile = req.file;
 
-    if (!name) {
-      return next(createHttpError(400, 'Institution name is required'));
+    if (!name || !city || !state) {
+      return next(createHttpError(400, 'Name, city, and state are required'));
     }
 
     if (!logoFile) {
@@ -35,6 +35,8 @@ const createInstitution = async (
     const institution = await prisma.institution.create({
       data: {
         name,
+        city,
+        state,
         logo: logo.secure_url,
         city,
         state,
@@ -43,7 +45,7 @@ const createInstitution = async (
 
     return res.status(201).json(institution);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(createHttpError(500, 'Error while creating institution'));
   }
 };
@@ -62,7 +64,7 @@ const getAllInstitutions = async (
 
     return res.status(200).json(institutions);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(createHttpError(500, 'Error while fetching institutions'));
   }
 };
@@ -87,14 +89,15 @@ const updateInstitution = async (
       return next(createHttpError(404, 'Institution not found'));
     }
 
-    const data: any = {};
-    const body = req.body || {};
+    const data: Record<string, any> = {};
+    const { name, city, state } = req.body || {};
 
-    if (body.name) data.name = body.name;
+    if (name) data.name = name;
+    if (city) data.city = city;
+    if (state) data.state = state;
 
     // SAFE logo replacement
     if (req.file) {
-      // 1. Upload new logo
       const newLogo = await uploadonCloudinary(req.file.path, {
         folder: 'institutions',
       });
@@ -106,13 +109,13 @@ const updateInstitution = async (
       data.logo = newLogo.secure_url;
     }
 
-    // 2. Update DB
+    // Update DB first
     const updatedInstitution = await prisma.institution.update({
       where: { id },
       data,
     });
 
-    // 3. Delete old logo AFTER DB update
+    // Delete old logo AFTER DB update
     if (req.file && institution.logo) {
       const oldPublicId = getPublicId(institution.logo);
       if (oldPublicId) {
@@ -122,7 +125,7 @@ const updateInstitution = async (
 
     return res.status(200).json(updatedInstitution);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(createHttpError(500, 'Error while updating institution'));
   }
 };
@@ -147,7 +150,7 @@ const deleteInstitution = async (
       return next(createHttpError(404, 'Institution not found'));
     }
 
-    // 1. Delete logo from Cloudinary
+    // Delete logo from Cloudinary
     if (institution.logo) {
       const publicId = getPublicId(institution.logo);
       if (publicId) {
@@ -155,7 +158,7 @@ const deleteInstitution = async (
       }
     }
 
-    // 2. Delete DB row
+    // Delete DB record
     await prisma.institution.delete({
       where: { id },
     });
@@ -164,7 +167,7 @@ const deleteInstitution = async (
       message: 'Institution deleted successfully',
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(createHttpError(500, 'Error while deleting institution'));
   }
 };
