@@ -1,7 +1,14 @@
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
 
+app.use(
+  cors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -43,5 +50,20 @@ app.use('/api/v1/terms-of-service', termsOfServiceRouter);
 // career router
 import careerRouter from './routers/career.js';
 app.use('/api/v1/careers', careerRouter);
+
+// testimonial router
+import testimonialRouter from './routers/testimonial.js';
+app.use('/api/testimonials', testimonialRouter);
+
+import contactDetailsRouter from './routers/contact.js';
+app.use('/api/v1/contact-details', contactDetailsRouter);
+
+// social link router
+import socialLinkRouter from './routers/social.js';
+app.use('/api/v1/social-link', socialLinkRouter);
+
+// metrics router
+import metricsRouter from './routers/metrics.js';
+app.use('/api/v1/metrics', metricsRouter);
 
 export default app;
