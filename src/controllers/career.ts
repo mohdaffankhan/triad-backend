@@ -50,4 +50,31 @@ const getAllCareers = async (
   }
 };
 
-export { createCareer, getAllCareers };
+const getCareerById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Career id is required'));
+  }
+
+  try {
+    const career = await prisma.career.findUnique({
+      where: { id },
+    });
+
+    if (!career) {
+      return next(createHttpError(404, 'Career not found'));
+    }
+
+    return res.status(200).json(career);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while fetching career'));
+  }
+};
+
+export { createCareer, getAllCareers, getCareerById };
