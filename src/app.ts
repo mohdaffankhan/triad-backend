@@ -40,4 +40,8 @@ app.use('/api/v1/privacy-policy', privacyPolicyRouter);
 import termsOfServiceRouter from './routers/termsOfService.js';
 app.use('/api/v1/terms-of-service', termsOfServiceRouter);
 
+// career router
+import careerRouter from './routers/career.js';
+app.use('/api/v1/careers', careerRouter);
+
 export default app;
