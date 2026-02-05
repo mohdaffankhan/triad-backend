@@ -38,8 +38,6 @@ const createInstitution = async (
         city,
         state,
         logo: logo.secure_url,
-        city,
-        state,
       },
     });
 

@@ -18,7 +18,7 @@ const createMentor = async (
 
     const imageFile = req.file;
 
-    if (!name || !experience || !designation || !linkedinUrl || !qoute) {
+    if (!name || !experience || !designation || !linkedinUrl || !quote) {
       return next(createHttpError(400, 'All mentor fields are required'));
     }
 
