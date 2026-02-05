@@ -52,8 +52,12 @@ const getAllInstitutions = async (
   next: NextFunction,
 ) => {
   try {
+    const { limit } = req.query;
+    const take = limit ? Number(limit) : undefined;
+
     const institutions = await prisma.institution.findMany({
       orderBy: { createdAt: 'desc' },
+      take,
     });
 
     return res.status(200).json(institutions);
