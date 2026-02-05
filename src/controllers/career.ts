@@ -77,4 +77,22 @@ const getCareerById = async (
   }
 };
 
-export { createCareer, getAllCareers, getCareerById };
+const getFeaturedCareers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const careers = await prisma.career.findMany({
+      where: { featured: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return res.status(200).json(careers);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while fetching featured careers'));
+  }
+};
+
+export { createCareer, getAllCareers, getCareerById, getFeaturedCareers };
