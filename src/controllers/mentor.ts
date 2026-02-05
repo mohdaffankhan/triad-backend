@@ -13,7 +13,7 @@ const createMentor = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, experience, designation, linkedinUrl } = req.body;
+    const { name, experience, designation, linkedinUrl, quote } = req.body;
     const imagefile = req.file;
 
     if (!imagefile) {
@@ -30,6 +30,7 @@ const createMentor = async (
         experience,
         designation,
         linkedinUrl,
+        quote,
         image: image?.secure_url || '',
       },
     });

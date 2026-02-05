@@ -13,7 +13,7 @@ const createInstitution = async (
   next: NextFunction,
 ) => {
   try {
-    const { name } = req.body;
+    const { name, city, state } = req.body;
     const logoFile = req.file;
 
     if (!name) {
@@ -36,6 +36,8 @@ const createInstitution = async (
       data: {
         name,
         logo: logo.secure_url,
+        city,
+        state,
       },
     });
 
@@ -53,11 +55,9 @@ const getAllInstitutions = async (
 ) => {
   try {
     const { limit } = req.query;
-    const take = limit ? Number(limit) : undefined;
-
     const institutions = await prisma.institution.findMany({
       orderBy: { createdAt: 'desc' },
-      take,
+      ...(limit && { take: Number(limit) }),
     });
 
     return res.status(200).json(institutions);

@@ -12,7 +12,7 @@ const getTestimonials = async (
     const take = limit ? Number(limit) : undefined;
 
     const testimonials = await prisma.testimonials.findMany({
-      take,
+      ...(take !== undefined ? { take } : {}),
       include: {
         course: true,
       },

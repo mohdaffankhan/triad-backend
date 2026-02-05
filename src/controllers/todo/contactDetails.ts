@@ -9,7 +9,7 @@ const getContactDetails = async (
 ) => {
   try {
     const { id } = req.params;
-    const targetId = id || 'general';
+    const targetId = (typeof id === 'string' ? id : undefined) || 'general';
 
     const details = await prisma.contact_details.findUnique({
       where: { id: targetId },
