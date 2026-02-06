@@ -4,10 +4,12 @@ import prisma from '../lib/prisma.js';
 
 const createTool = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, description, url } = req.body;
+    const { name, description, url, icon, coverImage } = req.body;
 
     if (!name || !description || !url) {
-      return next(createHttpError(400, 'All fields are required'));
+      return next(
+        createHttpError(400, 'Name, description and url are required'),
+      );
     }
 
     const tool = await prisma.tool.create({
@@ -15,6 +17,8 @@ const createTool = async (req: Request, res: Response, next: NextFunction) => {
         name,
         description,
         url,
+        icon: icon || null,
+        coverImage: coverImage || null,
       },
     });
 
@@ -30,6 +34,13 @@ const getAllTools = async (req: Request, res: Response, next: NextFunction) => {
     const tools = await prisma.tool.findMany({
       orderBy: {
         createdAt: 'desc',
+      },
+      include: {
+        courses: {
+          include: {
+            course: true,
+          },
+        },
       },
     });
 
@@ -62,6 +73,14 @@ const updateTool = async (req: Request, res: Response, next: NextFunction) => {
     if (body.name) data.name = body.name;
     if (body.description) data.description = body.description;
     if (body.url) data.url = body.url;
+
+    if (typeof body.icon !== 'undefined') {
+      data.icon = body.icon || null;
+    }
+
+    if (typeof body.coverImage !== 'undefined') {
+      data.coverImage = body.coverImage || null;
+    }
 
     const updatedTool = await prisma.tool.update({
       where: { id },
