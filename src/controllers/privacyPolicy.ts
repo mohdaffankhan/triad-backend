@@ -42,7 +42,7 @@ const upsertPrivacyPolicy = async (
           where: { id: existing.id },
           data: {
             content,
-            effectiveDate: new Date(effectiveDate),
+            effectiveDate,
           },
         })
       : await prisma.privacyPolicy.create({
