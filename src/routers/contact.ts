@@ -1,8 +1,8 @@
 import express from 'express';
-import { getContactDetails } from '../controllers/contact.js';
+import { getContact } from '../controllers/contact.js';
 
-const contactDetailsRouter = express.Router();
+const contactRouter = express.Router();
 
-contactDetailsRouter.get('/:id', getContactDetails);
+contactRouter.get('/', getContact);
 
-export default contactDetailsRouter;
+export default contactRouter;

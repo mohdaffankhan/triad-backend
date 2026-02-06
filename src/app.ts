@@ -55,8 +55,9 @@ app.use('/api/v1/careers', careerRouter);
 import testimonialRouter from './routers/testimonial.js';
 app.use('/api/testimonials', testimonialRouter);
 
-import contactDetailsRouter from './routers/contact.js';
-app.use('/api/v1/contact-details', contactDetailsRouter);
+// contact router
+import contactRouter from './routers/contact.js';
+app.use('/api/v1/contact', contactRouter);
 
 // social link router
 import socialLinkRouter from './routers/social.js';
