@@ -23,6 +23,7 @@ const createCourse = async (
       originalPrice,
       discountedPrice,
       features,
+      isRunning, // ✅ NEW
     } = req.body;
 
     const coverImageFile = req.file;
@@ -41,13 +42,10 @@ const createCourse = async (
 
     // Parse features
     let parsedFeatures: string[] = [];
-
     if (typeof features === 'string') {
       try {
-        // If frontend sends JSON: '["Feature 1","Feature 2"]'
         parsedFeatures = JSON.parse(features);
       } catch {
-        // If frontend sends: "Feature 1, Feature 2"
         parsedFeatures = features.split(',').map((f) => f.trim());
       }
     }
@@ -64,6 +62,7 @@ const createCourse = async (
         originalPrice: Number(originalPrice),
         discountedPrice: Number(discountedPrice),
         features: parsedFeatures,
+        isRunning: Boolean(isRunning),
       },
     });
 
@@ -90,11 +89,13 @@ const getCourseById = async (
       where: { id: courseId },
       include: {
         mentors: {
-          include: {
-            mentor: true,
-          }
-        }
-      }
+          include: { mentor: true },
+        },
+        tools: {
+          include: { tool: true },
+        },
+        testimonials: true,
+      },
     });
 
     if (!course) {
@@ -120,12 +121,14 @@ const updateCourse = async (
   }
 
   try {
-    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
     if (!course) {
       return next(createHttpError(404, 'Course not found'));
     }
 
-    // Build update object dynamically
     const data: any = {};
 
     if (req.body.title) data.title = req.body.title;
@@ -145,6 +148,10 @@ const updateCourse = async (
     if (req.body.discountedPrice)
       data.discountedPrice = Number(req.body.discountedPrice);
 
+    if (typeof req.body.isRunning !== 'undefined') {
+      data.isRunning = Boolean(req.body.isRunning);
+    }
+
     // Features
     if (req.body.features) {
       try {
@@ -156,11 +163,8 @@ const updateCourse = async (
       }
     }
 
-    let newImagePublicId: string | null = null;
-
-    // Image replacement (SAFE ORDER)
+    // Image replacement
     if (req.file) {
-      // 1. Upload new image first
       const newImage = await uploadonCloudinary(req.file.path, {
         folder: 'courses',
       });
@@ -169,18 +173,15 @@ const updateCourse = async (
         return next(createHttpError(500, 'New image upload failed'));
       }
 
-      // 2. Prepare DB update
       data.coverImage = newImage.secure_url;
-      newImagePublicId = newImage.public_id;
     }
 
-    // 3. Update DB
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data,
     });
 
-    // 4. Now delete old image safely
+    // Delete old image AFTER update
     if (req.file && course.coverImage) {
       const oldPublicId = getPublicId(course.coverImage);
       if (oldPublicId) {
@@ -207,13 +208,14 @@ const deleteCourse = async (
   }
 
   try {
-    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
 
     if (!course) {
       return next(createHttpError(404, 'Course not found'));
     }
 
-    // delete image from Cloudinary
     if (course.coverImage) {
       const publicId = getPublicId(course.coverImage);
       if (publicId) {
@@ -237,32 +239,37 @@ const deleteCourse = async (
 const getAllCourses = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const courses = await prisma.course.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: 'desc' },
       include: {
         mentors: {
-          include: {
-            mentor: true,
-          },
+          include: { mentor: true },
         },
-      }
+        tools: {
+          include: { tool: true },
+        },
+        testimonials: true,
+      },
     });
 
-    if (courses.length === 0) {
+    if (!courses.length) {
       return res.status(404).json({ message: 'No courses found' });
     }
 
     return res.status(200).json(courses);
   } catch (error) {
     console.log(error);
-    return next(createHttpError(500, "Error while getting all courses"));
+    return next(createHttpError(500, 'Error while getting all courses'));
   }
 };
 
-
-export { createCourse, getCourseById, updateCourse, deleteCourse, getAllCourses };
+export {
+  createCourse,
+  getCourseById,
+  updateCourse,
+  deleteCourse,
+  getAllCourses,
+};
