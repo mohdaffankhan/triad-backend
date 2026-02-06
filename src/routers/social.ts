@@ -1,8 +1,8 @@
 import express from 'express';
-import { getContactDetails } from '../controllers/contact.js';
+import { getSocialLinks } from '../controllers/social.js';
 
 const socialLinkRouter = express.Router();
 
-socialLinkRouter.get('/', getContactDetails);
+socialLinkRouter.get('/', getSocialLinks);
 
 export default socialLinkRouter;
