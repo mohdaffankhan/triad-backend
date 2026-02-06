@@ -19,4 +19,44 @@ const getContact = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { getContact };
+const upsertContact = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, phone, country_code } = req.body || {};
+
+    if (!email || !phone || !country_code) {
+      return next(
+        createHttpError(400, 'Email, phone, and country code are required'),
+      );
+    }
+
+    const existing = await prisma.contact.findFirst();
+
+    const contact = existing
+      ? await prisma.contact.update({
+          where: { id: existing.id },
+          data: {
+            email,
+            phone,
+            country_code,
+          },
+        })
+      : await prisma.contact.create({
+          data: {
+            email,
+            phone,
+            country_code,
+          },
+        });
+
+    return res.status(200).json(contact);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while saving contact information'));
+  }
+};
+
+export { getContact, upsertContact };
