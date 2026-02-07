@@ -57,7 +57,7 @@ app.use('/api/v1/careers', careerRouter);
 
 // testimonial router
 import testimonialRouter from './routers/testimonial.js';
-app.use('/api/testimonials', testimonialRouter);
+app.use('/api/v1/testimonials', testimonialRouter);
 
 // contact router
 import contactRouter from './routers/contact.js';

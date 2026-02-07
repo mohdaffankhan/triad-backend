@@ -11,33 +11,50 @@ const getTestimonials = async (
   res: Response,
   next: NextFunction,
 ) => {
+  const { type, courseId, limit = '10', page = '1' } = req.query;
+
+  const take = Math.min(Number(limit), 50); // hard safety cap
+  const skip = (Number(page) - 1) * take;
+
+  if (Number.isNaN(take) || Number.isNaN(skip) || take <= 0 || skip < 0) {
+    return next(createHttpError(400, 'Invalid pagination parameters'));
+  }
+
   try {
-    const limitParam = Number(req.query.limit);
-    const take =
-      Number.isInteger(limitParam) && limitParam > 0 ? limitParam : undefined;
-
-    const { type, courseId } = req.query;
-
     const where: any = {};
-    if (type) where.type = type;
-    if (courseId) where.courseId = courseId;
 
-    const testimonials = await prisma.testimonial.findMany({
-      where,
-      ...(take ? { take } : {}),
-      orderBy: { createdAt: 'desc' },
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-            coverImage: true,
-          },
+    if (type) {
+      where.type = type;
+    }
+
+    if (courseId && !Array.isArray(courseId)) {
+      where.courseId = courseId;
+    }
+
+    const [testimonials, total] = await Promise.all([
+      prisma.testimonial.findMany({
+        where,
+        take,
+        skip,
+        orderBy: {
+          createdAt: 'desc',
         },
+        include: {
+          course: true,
+        },
+      }),
+      prisma.testimonial.count({ where }),
+    ]);
+
+    return res.status(200).json({
+      data: testimonials,
+      meta: {
+        total,
+        page: Number(page),
+        limit: take,
+        totalPages: Math.ceil(total / take),
       },
     });
-
-    return res.status(200).json(testimonials);
   } catch (error) {
     console.error(error);
     return next(createHttpError(500, 'Error while fetching testimonials'));
