@@ -47,4 +47,52 @@ const attachToolToCourse = async (
   }
 };
 
-export { attachToolToCourse };
+const detachToolFromCourse = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { courseId, toolId } = req.params;
+
+  if (
+    !courseId ||
+    !toolId ||
+    Array.isArray(courseId) ||
+    Array.isArray(toolId)
+  ) {
+    return next(createHttpError(400, 'course id and tool id are required'));
+  }
+
+  try {
+    const relation = await prisma.courseTool.findUnique({
+      where: {
+        courseId_toolId: {
+          courseId,
+          toolId,
+        },
+      },
+    });
+
+    if (!relation) {
+      return next(createHttpError(404, 'Tool is not attached to this course'));
+    }
+
+    await prisma.courseTool.delete({
+      where: {
+        courseId_toolId: {
+          courseId,
+          toolId,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Tool detached from course successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while detaching tool from course'));
+  }
+};
+
+export { attachToolToCourse, detachToolFromCourse };
