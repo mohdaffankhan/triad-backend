@@ -116,4 +116,33 @@ const getTestimonials = async (
   }
 };
 
-export { createTestimonial, getTestimonials };
+const getAllTestimonials = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const testimonials = await prisma.testimonial.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        course: true,
+      },
+    });
+
+    return res.status(200).json({
+      total: testimonials.length,
+      data: testimonials,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(createHttpError(500, 'Error while fetching all testimonials'));
+  }
+};
+
+export {
+  createTestimonial,
+  getTestimonials,
+  getAllTestimonials
+};
