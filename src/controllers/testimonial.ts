@@ -141,8 +141,40 @@ const getAllTestimonials = async (
   }
 };
 
+const getTestimonialsByCourseId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { courseId } = req.params;
+
+  if (!courseId || Array.isArray(courseId)) {
+    return next(createHttpError(400, 'Course id is required'));
+  }
+
+  try {
+    const testimonials = await prisma.testimonial.findMany({
+      where: {
+        courseId,
+        type: 'COURSE',
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return res.status(200).json(testimonials);
+  } catch (error) {
+    console.log(error);
+    return next(
+      createHttpError(500, 'Error while fetching course testimonials'),
+    );
+  }
+};
+
 export {
   createTestimonial,
   getTestimonials,
-  getAllTestimonials
+  getAllTestimonials,
+  getTestimonialsByCourseId,
 };

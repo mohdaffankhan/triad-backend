@@ -3,6 +3,7 @@ import {
   createTestimonial,
   getTestimonials,
   getAllTestimonials,
+  getTestimonialsByCourseId
 } from '../controllers/testimonial.js';
 
 const testimonialRouter = express.Router();
@@ -13,5 +14,6 @@ testimonialRouter.post('/', createTestimonial);
 testimonialRouter.get('/', getTestimonials);
 
 testimonialRouter.get('/all', getAllTestimonials);
+testimonialRouter.get('/course/:courseId', getTestimonialsByCourseId);
 
 export default testimonialRouter;
