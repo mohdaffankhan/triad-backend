@@ -2,6 +2,61 @@ import type { Request, Response, NextFunction } from 'express';
 import createHttpError from 'http-errors';
 import prisma from '../lib/prisma.js';
 
+const createTestimonial = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { name, role, image, quote, type, courseId } = req.body;
+
+    if (!name || !quote) {
+      return next(createHttpError(400, 'Name and quote are required'));
+    }
+
+    if (type === 'COURSE') {
+      if (!courseId || Array.isArray(courseId)) {
+        return next(
+          createHttpError(400, 'course id is required for Course testimonial'),
+        );
+      }
+
+      const courseExists = await prisma.course.findUnique({
+        where: { id: courseId },
+      });
+
+      if (!courseExists) {
+        return next(createHttpError(404, 'Course not found'));
+      }
+    }
+
+    if (type === 'GENERAL' && courseId) {
+      return next(
+        createHttpError(
+          400,
+          'course id must not be provided for GENERAL testimonial',
+        ),
+      );
+    }
+
+    const testimonial = await prisma.testimonial.create({
+      data: {
+        name,
+        role: role || null,
+        image: image || null,
+        quote,
+        type: type || 'GENERAL',
+        courseId: type === 'COURSE' ? courseId : null,
+      },
+    });
+
+    return res.status(201).json(testimonial);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while creating testimonial'));
+  }
+};
+
 /**
  * GET /testimonials
  * Supports: limit, type, courseId
@@ -61,4 +116,4 @@ const getTestimonials = async (
   }
 };
 
-export { getTestimonials };
+export { createTestimonial, getTestimonials };
