@@ -3,7 +3,8 @@ import {
   createTestimonial,
   getTestimonials,
   getAllTestimonials,
-  getTestimonialsByCourseId
+  getTestimonialsByCourseId,
+  updateTestimonial,
 } from '../controllers/testimonial.js';
 
 const testimonialRouter = express.Router();
@@ -15,5 +16,6 @@ testimonialRouter.get('/', getTestimonials);
 
 testimonialRouter.get('/all', getAllTestimonials);
 testimonialRouter.get('/course/:courseId', getTestimonialsByCourseId);
+testimonialRouter.patch('/:id', updateTestimonial);
 
 export default testimonialRouter;

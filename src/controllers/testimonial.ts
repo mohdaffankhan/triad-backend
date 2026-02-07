@@ -172,9 +172,77 @@ const getTestimonialsByCourseId = async (
   }
 };
 
+const updateTestimonial = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Testimonial id is required'));
+  }
+
+  try {
+    const testimonial = await prisma.testimonial.findUnique({
+      where: { id },
+    });
+
+    if (!testimonial) {
+      return next(createHttpError(404, 'Testimonial not found'));
+    }
+
+    const data: any = {};
+    const body = req.body;
+
+    if (body.name) data.name = body.name;
+    if (body.role !== undefined) data.role = body.role || null;
+    if (body.image !== undefined) data.image = body.image || null;
+    if (body.quote) data.quote = body.quote;
+
+    // Type change handling
+    if (body.type) {
+      if (body.type === 'COURSE') {
+        if (!body.courseId) {
+          return next(
+            createHttpError(400, 'courseId required for COURSE testimonial'),
+          );
+        }
+
+        const courseExists = await prisma.course.findUnique({
+          where: { id: body.courseId },
+        });
+
+        if (!courseExists) {
+          return next(createHttpError(404, 'Course not found'));
+        }
+
+        data.type = 'COURSE';
+        data.courseId = body.courseId;
+      }
+
+      if (body.type === 'GENERAL') {
+        data.type = 'GENERAL';
+        data.courseId = null;
+      }
+    }
+
+    const updated = await prisma.testimonial.update({
+      where: { id },
+      data,
+    });
+
+    return res.status(200).json(updated);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while updating testimonial'));
+  }
+};
+
 export {
   createTestimonial,
   getTestimonials,
   getAllTestimonials,
   getTestimonialsByCourseId,
+  updateTestimonial
 };
