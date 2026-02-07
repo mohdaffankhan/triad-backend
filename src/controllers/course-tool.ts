@@ -121,4 +121,35 @@ const getToolsByCourseId = async (
   }
 };
 
-export { attachToolToCourse, detachToolFromCourse, getToolsByCourseId };
+const getCoursesByToolId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { toolId } = req.params;
+
+  if (!toolId || Array.isArray(toolId)) {
+    return next(createHttpError(400, 'Tool id is required'));
+  }
+
+  try {
+    const courses = await prisma.courseTool.findMany({
+      where: { toolId },
+      include: {
+        course: true,
+      },
+    });
+
+    return res.status(200).json(courses);
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while fetching courses for tool'));
+  }
+};
+
+export {
+  attachToolToCourse,
+  detachToolFromCourse,
+  getToolsByCourseId,
+  getCoursesByToolId,
+};
