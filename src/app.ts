@@ -31,6 +31,10 @@ app.use('/api/v1/course-mentor', courseMentorRouter);
 import toolRouter from './routers/tool.js';
 app.use('/api/v1/tools', toolRouter);
 
+// course-tool router
+import courseToolRouter from './routers/course-tool.js';
+app.use('/api/v1/course-tool', courseToolRouter);
+
 // workshop router
 import workshopRouter from './routers/workshop.js';
 app.use('/api/v1/workshops', workshopRouter);
