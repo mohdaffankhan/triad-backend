@@ -239,10 +239,44 @@ const updateTestimonial = async (
   }
 };
 
+const deleteTestimonial = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return next(createHttpError(400, 'Testimonial id is required'));
+  }
+
+  try {
+    const testimonial = await prisma.testimonial.findUnique({
+      where: { id },
+    });
+
+    if (!testimonial) {
+      return next(createHttpError(404, 'Testimonial not found'));
+    }
+
+    await prisma.testimonial.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({
+      message: 'Testimonial deleted successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, 'Error while deleting testimonial'));
+  }
+};
+
 export {
   createTestimonial,
   getTestimonials,
   getAllTestimonials,
   getTestimonialsByCourseId,
-  updateTestimonial
+  updateTestimonial,
+  deleteTestimonial,
 };
