@@ -4,16 +4,17 @@ import prisma from '../lib/prisma.js';
 
 const getMetrics = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const metrics = await prisma.metrics.findFirst();
+    const metrics = await prisma.metrics.findUnique({
+      where: { id: 'singleton' },
+    });
 
     if (!metrics) {
-      return next(createHttpError(404, 'Metrics not found'));
+      return next(createHttpError(404, 'Metrics not initialized'));
     }
 
     return res.status(200).json(metrics);
   } catch (error) {
-    console.log(error);
-    return next(createHttpError(500, 'Error while fetching metrics'));
+    return next(createHttpError(500, 'Error fetching metrics'));
   }
 };
 
