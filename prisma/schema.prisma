@@ -177,12 +177,19 @@ model Social {
 }
 
 model Metrics {
-  id              String   @id @default(cuid())
-  total_students  Int
-  total_workshops Int
-  total_projects  Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                  String @id @default("singleton")
+  total_students      Int
+  total_workshops     Int
+  total_projects      Int
+  total_courses       Int
+  total_mentors       Int
+  total_institutes    Int
+  total_cities        Int
+  total_states        Int
+  total_content_hours Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Testimonial {
