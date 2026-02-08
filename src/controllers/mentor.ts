@@ -6,6 +6,7 @@ import {
 } from '../config/cloudinary.js';
 import prisma from '../lib/prisma.js';
 import { getPublicId } from '../lib/cloudinary.js';
+import { recomputeMetrics } from '../services/metric.js';
 
 const createMentor = async (
   req: Request,
@@ -43,6 +44,8 @@ const createMentor = async (
         image: image.secure_url,
       },
     });
+
+    await recomputeMetrics();
 
     return res.status(201).json(mentor);
   } catch (error) {
@@ -125,6 +128,8 @@ const updateMentor = async (
       }
     }
 
+    await recomputeMetrics();
+
     return res.status(200).json(updatedMentor);
   } catch (error) {
     console.error(error);
@@ -163,6 +168,8 @@ const deleteMentor = async (
     await prisma.mentor.delete({
       where: { id: mentorId },
     });
+
+    await recomputeMetrics();
 
     return res.status(200).json({
       message: 'Mentor deleted successfully',

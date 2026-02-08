@@ -6,6 +6,7 @@ import {
   uploadonCloudinary,
 } from '../config/cloudinary.js';
 import { getPublicId } from '../lib/cloudinary.js';
+import { recomputeMetrics } from '../services/metric.js';
 
 const createCourse = async (
   req: Request,
@@ -65,6 +66,8 @@ const createCourse = async (
         isRunning: Boolean(isRunning),
       },
     });
+
+    await recomputeMetrics();
 
     return res.status(201).json(course);
   } catch (error) {
@@ -189,6 +192,8 @@ const updateCourse = async (
       }
     }
 
+    await recomputeMetrics();
+
     return res.status(200).json(updatedCourse);
   } catch (error) {
     console.log(error);
@@ -226,6 +231,8 @@ const deleteCourse = async (
     await prisma.course.delete({
       where: { id: courseId },
     });
+
+    await recomputeMetrics();
 
     return res.status(200).json({
       message: 'Course deleted successfully',

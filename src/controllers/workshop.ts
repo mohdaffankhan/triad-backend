@@ -6,6 +6,7 @@ import {
   uploadonCloudinary,
 } from '../config/cloudinary.js';
 import { getPublicId } from '../lib/cloudinary.js';
+import { recomputeMetrics } from '../services/metric.js';
 
 const createWorkshop = async (
   req: Request,
@@ -42,6 +43,8 @@ const createWorkshop = async (
         coverImage: image.secure_url,
       },
     });
+
+    await recomputeMetrics();
 
     return res.status(201).json(workshop);
   } catch (error) {
@@ -124,6 +127,8 @@ const updateWorkshop = async (
       }
     }
 
+    await recomputeMetrics();
+
     return res.status(200).json(updatedWorkshop);
   } catch (error) {
     console.log(error);
@@ -162,6 +167,8 @@ const deleteWorkshop = async (
     await prisma.workshop.delete({
       where: { id },
     });
+
+    await recomputeMetrics();
 
     return res.status(200).json({
       message: 'Workshop deleted successfully',

@@ -6,6 +6,7 @@ import {
   deleteOnCloudinary,
   uploadonCloudinary,
 } from '../config/cloudinary.js';
+import { recomputeMetrics } from '../services/metric.js';
 
 const createInstitution = async (
   req: Request,
@@ -40,6 +41,8 @@ const createInstitution = async (
         logo: logo.secure_url,
       },
     });
+
+    await recomputeMetrics();
 
     return res.status(201).json(institution);
   } catch (error) {
@@ -119,6 +122,8 @@ const updateInstitution = async (
       }
     }
 
+    await recomputeMetrics();
+
     return res.status(200).json(updatedInstitution);
   } catch (error) {
     console.error(error);
@@ -158,6 +163,8 @@ const deleteInstitution = async (
     await prisma.institution.delete({
       where: { id },
     });
+
+    await recomputeMetrics();
 
     return res.status(200).json({
       message: 'Institution deleted successfully',
